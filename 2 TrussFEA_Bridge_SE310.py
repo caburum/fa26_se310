@@ -305,7 +305,7 @@ ax.set_title(
 )
 ax.set_xlabel("x (mm)"); ax.set_ylabel("y (mm)")
 ax.set_aspect('equal', adjustable='box')
-ax.set_xlim(-25, SPAN + 25); ax.set_ylim(-30, 130)
+ax.set_xlim(-50, 250); ax.set_ylim(-50, 100)
 ax.grid(alpha=.25)
 # support symbols
 ax.plot(x_sup_L, 0, marker='^', ms=11, color='k', zorder=5)

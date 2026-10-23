@@ -56,7 +56,7 @@ P_truss    = P_design / N_TRUSS                 # N  - design load on ONE truss
 #   ^                       ^
 #  pin                    roller    <-- the two desk edges, 200 mm apart
 #
-D_truss = 100.0            # mm - truss height above the desk top ( <= 100 mm )
+D_truss = 70.0            # mm - truss height above the desk top ( <= 100 mm )
 SPAN    = 250.0           # mm - clear span = overall length of the truss
 x_sup_L = 0.0             # mm - left support (edge of the left desk)
 x_sup_R = SPAN           # mm - right support (edge of the right desk)
