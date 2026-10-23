@@ -39,7 +39,7 @@ m_book_MM  = 1.00         # kg - "Machines and Mechanisms"
 g          = 9.81         # m/s^2
 W_books    = (m_book_SA + m_book_MM) * g        # N  - total service load
 P_design   = FS_req * W_books                   # N  - factored DESIGN load
-N_TRUSS    = 2                                  # two identical vertical trusses
+N_TRUSS    = 3                                  # two identical vertical trusses
 P_truss    = P_design / N_TRUSS                 # N  - design load on ONE truss
 
 # =============================================================================
@@ -56,35 +56,31 @@ P_truss    = P_design / N_TRUSS                 # N  - design load on ONE truss
 #   ^                       ^
 #  pin                    roller    <-- the two desk edges, 200 mm apart
 #
-D_truss = 70.0            # mm - truss height above the desk top ( <= 100 mm )
-SPAN    = 200.0           # mm - clear span = overall length of the truss
+D_truss = 100.0            # mm - truss height above the desk top ( <= 100 mm )
+SPAN    = 250.0           # mm - clear span = overall length of the truss
 x_sup_L = 0.0             # mm - left support (edge of the left desk)
-x_sup_R = 200.0           # mm - right support (edge of the right desk)
+x_sup_R = SPAN           # mm - right support (edge of the right desk)
 
 # ---- Nodal coordinates [x, y] (node numbering starts at 0, as in the original)
 nodeCords = np.array([
-	[  0.0,  70.0],   # 0  T0 - left end of the deck, directly over the support
-	[ 50.0,  70.0],   # 1  T1
-	[100.0,  70.0],   # 2  T2 - mid-span
-	[150.0,  70.0],   # 3  T3
-	[200.0,  70.0],   # 4  T4 - right end of the deck
-	[  0.0,   0.0],   # 5  B0 - LEFT SUPPORT  (pin)
-	[ 50.0,   0.0],   # 6  B1
-	[100.0,   0.0],   # 7  B2
-	[150.0,   0.0],   # 8  B3
-	[200.0,   0.0],   # 9  B4 - RIGHT SUPPORT (roller)
+	[SPAN/4,	D_truss],   # 0  T0 - upper left
+	[SPAN*3/4,	D_truss],   # 1  T1 - upper right
+	[0.0,		0.0],   # 2  B0 - LEFT SUPPORT  (pin)
+	[SPAN/2,	0.0],   # 3  B1
+	[SPAN,		0.0],   # 4  B2 - RIGHT SUPPORT (roller)
 ])
+print("nodeCords = ")
+print(nodeCords)
 
 # ---- Element connectivity [near node, far node]
 elemNodes = np.array([
 	# --- top chord = the deck the books sit on -----------------------------
-	[0, 1], [1, 2], [2, 3], [3, 4],
+	[0, 1],
 	# --- bottom chord (at desk level) --------------------------------------
-	[5, 6], [6, 7], [7, 8], [8, 9],
+	[2, 3], [3, 4],
 	# --- verticals (the end verticals sit directly over the supports) ------
-	[0, 5], [1, 6], [2, 7], [3, 8], [4, 9],
 	# --- Pratt diagonals (slope DOWN towards mid-span -> they take tension) -
-	[0, 6], [1, 7], [3, 7], [4, 8],
+	[0, 2], [0, 3], [1, 3], [1, 4]
 ])
 
 # ---- Material and section of every element
@@ -94,9 +90,9 @@ Imom = np.full((elemNodes.shape[0], 1), I_stick)    # mm^4
 
 # ---- Displacement constraints [node, dof, value]   dof: 1 = x , 2 = y
 DispCon = np.array([
-	[5, 1, 0.0],      # node 5 : pinned  -> ux = 0
-	[5, 2, 0.0],      # node 5 : pinned  -> uy = 0
-	[9, 2, 0.0],      # node 9 : roller  -> uy = 0
+	[2, 1, 0.0],      # node 2 : pinned  -> ux = 0
+	[2, 2, 0.0],      # node 2 : pinned  -> uy = 0
+	[4, 2, 0.0],      # node 4 : roller  -> uy = 0
 ])
 
 # ---- Applied forces [node, dof, value]   (downward = negative y)
@@ -104,17 +100,14 @@ DispCon = np.array([
 #  and is shared between the FOUR deck panels by tributary length:
 #  assuming all joints take the same weight
 Fval = np.array([
-	[0, 2, -P_truss / 5.0],
-	[1, 2, -P_truss / 5.0],
-	[2, 2, -P_truss / 5.0],
-	[3, 2, -P_truss / 5.0],
-	[4, 2, -P_truss / 5.0],
+	[0, 2, -P_truss / 2.0],
+	[1, 2, -P_truss / 2.0],
 ])
 
 
 CSV_OUT     = 'truss_results.csv'   # where the table is written
 DEFL_LIMIT  = 2.0      # mm - allowable mid-span deflection (design constraint)
-MID_NODE    = 2        # mid-span deck joint whose deflection is checked
+MID_NODE    = 3        # mid-span deck joint whose deflection is checked # fixme:
 SCALE_PLOT  = 20       # deformation magnification for the plot
 
 # =============================================================================
@@ -284,7 +277,7 @@ res = pd.DataFrame({
 
 res.to_csv(CSV_OUT, index=False)
 
-print(f" Design load on ONE truss = {P_truss:.2f} N   "
+print(f" Design load on ONE truss = {P_truss:.2f} N, for {N_TRUSS} repeated trusses   "
 	f"(FS = {FS_req:.0f} already applied, W_books = {W_books:.2f} N)")
 print(" +F = tension, -F = compression.  A member buckles when |F| reaches P_cr.")
 print()
@@ -293,6 +286,7 @@ print()
 print(f" Members that buckle: {buckles.count('Y')} of {nELEM}"
 	f"{'' if buckles.count('Y') == 0 else '  -> ' + str([k for k in range(nELEM) if buckles[k] == 'Y'])}")
 print(f" Maximum deflection D_max = {delta_mid:.3f} mm      "
+	f"Total length of material used = {total_len:.1f} mm      "
 	f"Structure mass M = {mass_truss:.1f} g")
 print(f" Table exported to: {CSV_OUT}")
 
@@ -304,7 +298,7 @@ ax.set_title(
 )
 ax.set_xlabel("x (mm)"); ax.set_ylabel("y (mm)")
 ax.set_aspect('equal', adjustable='box')
-ax.set_xlim(-25, 225); ax.set_ylim(-30, 100)
+ax.set_xlim(-25, SPAN + 25); ax.set_ylim(-30, 130)
 ax.grid(alpha=.25)
 # support symbols
 ax.plot(x_sup_L, 0, marker='^', ms=11, color='k', zorder=5)
