@@ -39,7 +39,7 @@ m_book_MM  = 1.00         # kg - "Machines and Mechanisms"
 g          = 9.81         # m/s^2
 W_books    = (m_book_SA + m_book_MM) * g        # N  - total service load
 P_design   = FS_req * W_books                   # N  - factored DESIGN load
-N_TRUSS    = 3                                  # two identical vertical trusses
+N_TRUSS    = 2                                  # two identical vertical trusses
 P_truss    = P_design / N_TRUSS                 # N  - design load on ONE truss
 
 # =============================================================================
