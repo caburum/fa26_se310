@@ -59,7 +59,7 @@ P_truss    = P_design / N_TRUSS                 # N  - design load on ONE truss
 D_truss = 70.0            # mm - truss height above the desk top ( <= 100 mm )
 SPAN    = 250.0           # mm - clear span = overall length of the truss
 x_sup_L = 0.0             # mm - left support (edge of the left desk)
-x_sup_R = SPAN           # mm - right support (edge of the right desk)
+x_sup_R = SPAN            # mm - right support (edge of the right desk)
 
 # ---- Nodal coordinates [x, y] (node numbering starts at 0, as in the original)
 nodeCords = np.array([
@@ -69,17 +69,15 @@ nodeCords = np.array([
 	[SPAN/2,	0.0],   # 3  B1
 	[SPAN,		0.0],   # 4  B2 - RIGHT SUPPORT (roller)
 ])
-print("nodeCords = ")
-print(nodeCords)
 
 # ---- Element connectivity [near node, far node]
 elemNodes = np.array([
-	# --- top chord = the deck the books sit on -----------------------------
+	# --- top chord = the deck the books sit on
 	[0, 1],
-	# --- bottom chord (at desk level) --------------------------------------
+	# --- bottom chord (at desk level)
 	[2, 3], [3, 4],
-	# --- verticals (the end verticals sit directly over the supports) ------
-	# --- Pratt diagonals (slope DOWN towards mid-span -> they take tension) -
+	# --- verticals
+	# --- diagonals
 	[0, 2], [0, 3], [1, 3], [1, 4]
 ])
 
@@ -292,7 +290,7 @@ print(f" Table exported to: {CSV_OUT}")
 
 # ---- Figure -----------------------------------------------------------------
 ax.set_title(
-	f"Sample design - Pratt deck-truss, books on top  "
+	f"Candidate Design A, books on top  "
 	f"(deformation x{SCALE_PLOT}; red = compression, blue = tension)",
 	fontsize=10
 )

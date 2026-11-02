@@ -59,7 +59,7 @@ P_truss    = P_design / N_TRUSS                 # N  - design load on ONE truss
 D_truss = 50.0            # mm - truss height above the desk top ( <= 100 mm )
 SPAN    = 240.0           # mm - clear span = overall length of the truss
 x_sup_L = -20             # mm - left support (edge of the left desk)
-x_sup_R = x_sup_L+SPAN           # mm - right support (edge of the right desk)
+x_sup_R = x_sup_L+SPAN    # mm - right support (edge of the right desk)
 
 # ---- Nodal coordinates [x, y] (node numbering starts at 0, as in the original)
 nodeCords = np.array([
@@ -69,23 +69,19 @@ nodeCords = np.array([
 	[160, D_truss],
 	# lower chord
 	[-20, 0],
-	# [40, 0],
 	[100, 0],
-	# [160, 0],
 	[220, 0]
 ])
-print("nodeCords = ")
-print(nodeCords)
 
 # ---- Element connectivity [near node, far node]
 elemNodes = np.array([
-	# --- top chord = the deck the books sit on -----------------------------
+	# --- top chord = the deck the books sit on
 	[0, 1], [1, 2],
-	# --- bottom chord (at desk level) --------------------------------------
+	# --- bottom chord (at desk level)
 	[3, 4], [4, 5],
-	# --- verticals (the end verticals sit directly over the supports) ------
+	# --- verticals
 	[1, 4],
-	# --- Pratt diagonals (slope DOWN towards mid-span -> they take tension) -
+	# --- diagonals
 	[0, 3], [0, 4], [2, 4], [2, 5]
 ])
 
@@ -102,9 +98,6 @@ DispCon = np.array([
 ])
 
 # ---- Applied forces [node, dof, value]   (downward = negative y)
-#  The books lie on the 200 mm deck.  Half of P_design goes to each side truss
-#  and is shared between the FOUR deck panels by tributary length:
-#  assuming all joints take the same weight
 Fval = np.array([
 	[0, 2, -P_truss / 3.0],
 	[1, 2, -P_truss / 3.0],
@@ -299,7 +292,7 @@ print(f" Table exported to: {CSV_OUT}")
 
 # ---- Figure -----------------------------------------------------------------
 ax.set_title(
-	f"Sample design - Pratt deck-truss, books on top  "
+	f"Candidate Design B, books on top  "
 	f"(deformation x{SCALE_PLOT}; red = compression, blue = tension)",
 	fontsize=10
 )
